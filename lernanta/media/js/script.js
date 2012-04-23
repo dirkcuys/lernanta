@@ -264,14 +264,6 @@ var batucada = {
             openidHandlers();
         }
     },
-    project_edit: {
-        onload: function() {
-            var $inputs = $('input[type=file]');
-            if ($inputs) {
-                attachFileUploadHandler($inputs);
-            }
-        }
-    },
     school_edit: {
         onload: function() {
             var $inputs = $('input[type=file]');
