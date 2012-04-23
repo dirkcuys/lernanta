@@ -15,3 +15,13 @@
 </form>
 </fieldset>
 {% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready( function(){
+        // attach AJAX file upload handler to image input
+        attachFileUploadHandler($('input[id=id_image]'));
+    });
+</script>
+
+{% endblock %}
