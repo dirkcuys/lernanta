@@ -40,6 +40,7 @@ from signups.models import Signup
 from tracker import models as tracker_models
 from reviews.models import Review
 from badges.models import Badge, Logic
+
 from drumbeat import messages
 from users.decorators import login_required
 
