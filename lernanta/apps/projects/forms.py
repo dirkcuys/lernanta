@@ -105,6 +105,23 @@ class ProjectStatusForm(forms.ModelForm):
         fields = ('start_date', 'end_date', 'under_development',
             'not_listed', 'archived')
 
+class ProjectBadgeForm(forms.Form):
+
+    completion_badge = forms.BooleanField()
+    badge_name = forms.CharField(max_length=128)
+    badge_description = forms.CharField(max_length=128)
+    badge_image = forms.ImageField()
+
+    class Meta:
+        fields = ('completion_badge', 'badge_name', 'badge_description', 'badge_image')
+
+    def clean_image(self):
+        #if self.cleaned_data['image'].size > settings.MAX_IMAGE_SIZE:
+        #    max_size = settings.MAX_IMAGE_SIZE / 1024
+        #    msg = _("Image exceeds max image size: %(max)dk")
+        #    raise forms.ValidationError(msg % dict(max=max_size))
+        return self.cleaned_data['image']
+
 
 class ProjectAddParticipantForm(forms.Form):
     user = forms.CharField()
