@@ -12,6 +12,7 @@ from django.views.decorators.http import require_http_methods
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Max
 from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
 
 from commonware.decorators import xframe_sameorigin
 
@@ -37,6 +38,7 @@ from activity.schema import verbs
 from signups.models import Signup
 from tracker import models as tracker_models
 from reviews.models import Review
+from badges.models import Badge, Logic
 
 from drumbeat import messages
 from users.decorators import login_required
@@ -749,6 +751,54 @@ def edit_status(request, slug):
         'is_challenge': (project.category == project.CHALLENGE),
     }, context_instance=RequestContext(request))
 
+@hide_deleted_projects
+@login_required
+@organizer_required
+def edit_badges(request, slug):
+    
+    project = get_object_or_404(Project, slug=slug)
+    metric_permissions = project.get_metrics_permissions(request.user)
+    
+    if request.method == 'POST':
+        form = project_forms.ProjectBadgeForm(request.POST, request.FILES)
+        if form.is_valid():
+            badge = Badge()
+            badge.name = form.cleaned_data.get('badge_name')
+            badge.description = form.cleaned_data.get('badge_description')
+            badge.requirements = _('Complete the challenge to receive this badge')
+            logic = Logic()
+            logic.name = "blah-badge-logic"
+            logic.unique = True
+            logic.save()
+            badge.logic = logic
+            badge.save()
+            badge.groups.add(project)
+            badge.save()
+
+            #TODO load file in chunks?
+            uploaded_file = form.cleaned_data.get('badge_image')
+            badge.image.save(uploaded_file.field_name, ContentFile(uploaded_file.read()))
+
+            project.completion_badges.add(badge)
+            project.save()
+            
+            raise Exception()
+            return http.HttpResponseRedirect(reverse('projects_edit_badges', kwargs={
+                'slug': project.slug,
+            }))
+        else:
+            msg = _('There was a problem saving the %s\'s badges.')
+            messages.error(request, msg % project.kind.lower())
+    else:
+        form = project_forms.ProjectBadgeForm()
+        
+    return render_to_response('projects/project_edit_badges.html', {
+        'form': form,
+        'project': project,
+        'badges_tab': True,
+        'can_view_metric_overview': metric_permissions[0],
+        'is_challenge': (project.category == project.CHALLENGE),
+    }, context_instance=RequestContext(request))
 
 @hide_deleted_projects
 @login_required
