@@ -104,22 +104,31 @@ class ProjectStatusForm(forms.ModelForm):
         fields = ('start_date', 'end_date', 'under_development',
             'not_listed', 'archived')
 
+
 class ProjectBadgeForm(forms.Form):
 
-    completion_badge = forms.BooleanField()
-    badge_name = forms.CharField(max_length=128)
-    badge_description = forms.CharField(max_length=128)
-    badge_image = forms.ImageField()
+    completion_badge = forms.BooleanField(required=False)
+    badge_name = forms.CharField(max_length=128, required=False)
+    badge_description = forms.CharField(max_length=128, required=False)
+    badge_image = forms.ImageField(required=False)
 
     class Meta:
         fields = ('completion_badge', 'badge_name', 'badge_description', 'badge_image')
 
-    def clean_image(self):
-        #if self.cleaned_data['image'].size > settings.MAX_IMAGE_SIZE:
-        #    max_size = settings.MAX_IMAGE_SIZE / 1024
-        #    msg = _("Image exceeds max image size: %(max)dk")
-        #    raise forms.ValidationError(msg % dict(max=max_size))
-        return self.cleaned_data['image']
+    def clean(self):
+        """ Ensures that fields are present when completion_badge is checked """
+        cleaned_data = super(ProjectBadgeForm, self).clean()
+        if cleaned_data.get('completion_badge', False):
+            if not cleaned_data.get('badge_name'):
+                self._errors['badge_name'] = self.error_class([
+                    _('Badge name is required.')])
+            if not cleaned_data.get('badge_description'):
+                self._errors['badge_description'] = self.error_class([
+                    _('Badge description is required.')])
+            if not cleaned_data.get('badge_image'):
+                self._errors['badge_image'] = self.error_class([
+                    _('Badge image is required.')])
+        return cleaned_data        
 
 
 class ProjectAddParticipantForm(forms.Form):
