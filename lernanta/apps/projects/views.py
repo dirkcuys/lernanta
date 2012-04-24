@@ -780,35 +780,48 @@ def edit_status(request, slug):
 @hide_deleted_projects
 @login_required
 @organizer_required
-def edit_badges(request, slug):
-    
+def edit_badges(request, slug):    
     project = get_object_or_404(Project, slug=slug)
     metric_permissions = project.get_metrics_permissions(request.user)
+    completion_badge = None
+    if (project.completion_badges.count() == 1):
+        completion_badge = project.completion_badges.get()
     
     if request.method == 'POST':
         form = project_forms.ProjectBadgeForm(request.POST, request.FILES)
         if form.is_valid():
-            badge = Badge()
-            badge.name = form.cleaned_data.get('badge_name')
-            badge.description = form.cleaned_data.get('badge_description')
-            badge.requirements = _('Complete the challenge to receive this badge')
-            logic = Logic()
-            logic.name = "blah-badge-logic"
-            logic.unique = True
-            logic.save()
-            badge.logic = logic
-            badge.save()
-            badge.groups.add(project)
-            badge.save()
+            if form.cleaned_data.get('completion_badge', False) and not completion_badge:
+                # create new badge
+                badge = Badge()
+                badge.name = form.cleaned_data.get('badge_name')
+                badge.description = form.cleaned_data.get('badge_description')
+                badge.requirements = \
+                    _('Complete %(challenge)s to receive this badge.') % \
+                    {'challenge': project.name}
+                logic = Logic()
+                logic.name = \
+                    "{0}-challenge-completion-badge-logic".format(project.slug)
+                logic.unique = True
+                logic.save()
+                badge.logic = logic
+                badge.save()
+                badge.groups.add(project)
+                badge.save()
+                #TODO load file in chunks?
+                uploaded_file = form.cleaned_data.get('badge_image')
+                badge.image.save(uploaded_file.field_name,
+                    ContentFile(uploaded_file.read()))
+                project.completion_badges.add(badge)
+                project.save()
+            elif form.cleaned_data.get('completion_badge', False):
+                # update existing badge
+                pass
+            elif completion_badge:
+                project.completion_badges.clear()
+                project.save()
+                completion_badge.groups.remove(project)
+                completion_badge.save()
 
-            #TODO load file in chunks?
-            uploaded_file = form.cleaned_data.get('badge_image')
-            badge.image.save(uploaded_file.field_name, ContentFile(uploaded_file.read()))
-
-            project.completion_badges.add(badge)
-            project.save()
-            
-            raise Exception()
             return http.HttpResponseRedirect(reverse('projects_edit_badges', kwargs={
                 'slug': project.slug,
             }))
@@ -816,7 +829,12 @@ def edit_badges(request, slug):
             msg = _('There was a problem saving the %s\'s badges.')
             messages.error(request, msg % project.kind.lower())
     else:
-        form = project_forms.ProjectBadgeForm()
+        current_badge = {}
+        if (completion_badge):
+            current_badge['completion_badge'] = True
+            current_badge['badge_name'] = completion_badge.name
+            current_badge['badge_description'] = completion_badge.description
+        form = project_forms.ProjectBadgeForm(initial=current_badge)
         
     return render_to_response('projects/project_edit_badges.html', {
         'form': form,
