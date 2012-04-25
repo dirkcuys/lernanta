@@ -20,27 +20,44 @@
             </label>
             {{ form.completion_badge.errors }}
         </div>
-        <div class="field{% if form.badge_name.errors %} error{% endif %}">
-            <label for="id_badge_name">{{ _('Badge name:') }}</label>
-            {{ form.badge_name }}
-            {{ form.badge_name.errors }}
+        <div id="id_other_fields_div">
+            <div class="field{% if form.badge_name.errors %} error{% endif %}">
+                <label for="id_badge_name">{{ _('Badge name:') }}</label>
+                {{ form.badge_name }}
+                {{ form.badge_name.errors }}
+            </div>
+            <div class="field{% if form.badge_description.errors %} error{% endif %}">
+                <label for="id_badge_description">{{ _('Badge desciption:') }}</label>
+                {{ form.badge_description }}
+                {{ form.badge_description.errors }}
+            </div>
+            <div class="field{% if form.badge_image.errors %} error{% endif %}">
+                <label for="id_badge_image">{{ _('Badge image:') }}</label>
+                {{ form.badge_image }}
+                <small class="hint block">{{ _('File Types: JPG, GIF or PNG only<br/> Max size: 700k <br/> Dimensions: 200x200 pixels') }}</small>
+                {{ form.badge_image.errors }}
+            </div>
         </div>
-        <div class="field{% if form.badge_description.errors %} error{% endif %}">
-            <label for="id_badge_description">{{ _('Badge desciption:') }}</label>
-            {{ form.badge_description }}
-            {{ form.badge_description.errors }}
-        </div>
-        <div class="field{% if form.badge_image.errors %} error{% endif %}">
-            <label for="id_badge_image">{{ _('Badge image:') }}</label>
-            {{ form.badge_image }}
-            <small class="hint block">{{ _('File Types: JPG, GIF or PNG only<br/> Max size: 700k <br/> Dimensions: 200x200 pixels') }}</small>
-            {{ form.badge_image.errors }}
-        </div>
-  
         <p class= "buttons" >
             <a class="button" href="{% locale_url projects_show slug=project.slug %}">{{ _('Cancel') }}</a>
             <button type="submit" value="{{ _('Save') }}">{{ _('Save') }}</button>
         </p>
 </form>
 </fieldset>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready( function(){
+        // attach handler to make input disapper when the checkbox is not checked
+        $('input[id=id_completion_badge]').change(function(){
+            if ($('input[id=id_completion_badge]')[0].checked)
+                $('div[id=id_other_fields_div]').fadeIn();
+            else
+                $('div[id=id_other_fields_div]').fadeOut();
+            return true;
+        });
+        $('input[id=id_completion_badge]').change();
+    });
+</script>
 {% endblock %}
