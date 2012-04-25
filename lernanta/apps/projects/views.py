@@ -815,8 +815,11 @@ def edit_badges(request, slug):
                 project.save()
             elif form.cleaned_data.get('completion_badge', False):
                 # update existing badge
-                pass
+                completion_badge.name = form.cleaned_data.get('badge_name')
+                completion_badge.description = form.cleaned_data.get('badge_description')
+                completion_badge.save()
             elif completion_badge:
+                # remove current badge
                 project.completion_badges.clear()
                 project.save()
                 completion_badge.groups.remove(project)
