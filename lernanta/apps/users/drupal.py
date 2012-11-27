@@ -3,7 +3,7 @@ import logging
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import check_password as django_check_password
-from django.contrib.auth.models import get_hexdigest as django_get_hexdigest
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 
@@ -63,7 +63,7 @@ def get_openid_user(identity_url):
 
 def check_password(drupal_user, password):
     if '$' not in drupal_user.password:
-        encripted_password = django_get_hexdigest('md5', '', password)
+        encripted_password = make_password(password, '', 'md5')
         return (drupal_user.password == encripted_password)
     else:
         return django_check_password(password, drupal_user.password)

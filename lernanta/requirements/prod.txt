@@ -1,4 +1,4 @@
-django==1.3.1
+django==1.4.2
 python-memcached==1.48
 celery==2.4.6
 django-celery==2.4.2
@@ -12,7 +12,7 @@ django-messages==0.4.4
 python-openid==2.2.5
 markdown==2.1.1
 bleach==1.1.5
-django-maintenancemode==0.9.3.1
+django-maintenancemode==0.10
 tender_multipass==0.2.1
 simplejson==2.6.0
 django-tastypie==0.9.11
