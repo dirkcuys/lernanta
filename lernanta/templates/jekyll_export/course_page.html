@@ -1,0 +1,10 @@
+{% load content_tags %}{% load embed %}---
+course:
+    title: {{ course.name }}
+    url: {{ course.get_absolute_url }}
+    image: {{ course_image }}
+page_title: {{ page.title }}
+layout: course_page
+---
+
+{{ page.content|embed|safe }}

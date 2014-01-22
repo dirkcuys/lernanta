@@ -1,0 +1,25 @@
+{% load content_tags %}{% load embed %}---
+course: 
+    title: {{ course.name }}
+    language: {{ course.language }}
+    image: {{ course_image }}
+    pages:
+    {% for page in course_pages %} - title: {{ page.title }}
+       url: {{ page.get_absolute_url }}
+    {% endfor %}
+
+    followers:
+    {% for follower in course.non_participant_followers %} - username: {{follower.user.username}}
+       url: https://p2pu.org{{ follower.user.get_absolute_url }}
+    {% endfor %}
+    
+    organizers:
+    {% for user in course.organizers %} - username: {{user.user.username}}
+       url: https://p2pu.org{{ user.user.get_absolute_url }}
+    {% endfor %}
+
+
+layout: course_about
+---
+
+{{ course.long_description|embed|safe }}
