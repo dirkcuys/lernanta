@@ -1,8 +1,9 @@
 {% load content_tags %}{% load embed %}---
 course: 
-    title: {{ course.name }}
+    title: "{{ course.name }}"
     language: {{ course.language }}
     image: {{ course_image }}
+    based_on: {{ course.get_absolute_url }}
     pages:
     {% for page in course_pages %} - title: {{ page.title }}
        url: {{ page.get_absolute_url }}
@@ -14,7 +15,8 @@ course:
     {% endfor %}
     
     organizers:
-    {% for user in course.organizers %} - username: {{user.user.username}}
+    {% for user in course.organizers %} - name: {{user.user.username}}
+       image: {{ user.user.image_or_default }}
        url: https://p2pu.org{{ user.user.get_absolute_url }}
     {% endfor %}
 
